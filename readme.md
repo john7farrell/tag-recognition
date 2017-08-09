@@ -1,7 +1,7 @@
 ## Tag Recognition DEMO
 
 ### First install miniconda by:
-```bash BASHME\_miniconda\*```
+```bash BASHME_miniconda*```
 
 ### Then create virtual env by:
 ```conda create -n flask-py35 python=3.5```
