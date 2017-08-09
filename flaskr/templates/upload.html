@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block body %}
+	{% if session.logged_in %}
+		<title>Upload File</title>
+		<h1>Photo Upload</h1>
+		<form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            {{ form.photo }}
+            {% for error in form.photo.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+            <br>
+            {{ form.select }}
+			{{ form.submit }}
+		</form>
+		{% if file_url %}
+			<br>
+            <div class="img">
+			<img src="{{ file_url }}">
+            </div>
+		{% endif %}
+	{% endif %}
+	<ul class=entries>
+	{% for entry in entries %}
+		<li><h2>{{ entry.title }}</h2>
+			<ul><h3>ProductId: </h3>{{ entry.ProductId }}</ul>
+			<ul><h3>Origin: </h3>{{ entry.Origin }}</ul>
+			<ul><h3>Part: </h3>{{ entry.Part }}</ul>
+			<ul><h3>Material: </h3>{{ entry.Material }}</ul>
+			<ul><h3>Percent: </h3>{{ entry.Percent }}</ul>
+			<ul><h3>Filename: </h3>{{ entry.Filename }}</ul>
+			<ul><h3>FullText: </h3>{{ entry.FullText }}</ul>
+	{% else %}
+		<li><em>Unbelievable. No entries here so far</em>
+	{% endfor %}
+	</ul>
+{% endblock %}

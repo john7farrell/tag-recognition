@@ -1,0 +1,13 @@
+flaskr/upload/*.jpg
+flaskr/upload/*.JPG
+flaskr/upload/*.json
+flaskr/upload/*.png
+flaskr/upload/*.PNG
+flaskr/upload/*.bmp
+flaskr/upload/*.BMP
+flaskr/upload/*.jpeg
+flaskr/upload/*.JPEG
+flaskr/__pycache__
+flaskr/flaskr.db
+flaskr/.apikey
+flaskr/.idea
