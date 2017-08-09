@@ -11,3 +11,4 @@ flaskr/__pycache__
 flaskr/flaskr.db
 flaskr/.apikey
 flaskr/.idea
+flaskr.egg*

@@ -1,14 +1,22 @@
-#tag recognition demo
+## Tag Recognition DEMO
 
-First install miniconda by:
+### First install miniconda by:
+```bash BASHME\_miniconda\*```
 
-'''bash BASHME\_miniconda\*'''
+### Then create virtual env by:
+```conda create -n flask-py35 python=3.5```
 
-Then create virtual env by:
+### Then install necessary libraries by:
+```pip install -r requirements.txt```
 
-'''conda create -n flask-py35 python=3.5'''
+### Add GCP Vision APIKEY
+```#vi /flaskr/.apikey```
 
-Then install necessary libraries by:
+### Note(Problems)
+- socket gaierror: \[Errno -2\] Name or service not known
 
-'''pip install -r requirements.txt'''
+### Reference(Possible):
 
+- https://stackoverflow.com/questions/23777121/why-am-i-getting-socket-gaierror-errno-2-from-python-httplib
+
+- (*add Google DNS*) https://stackoverflow.com/questions/28668180/cant-install-pip-packages-inside-a-docker-container-with-ubuntu
