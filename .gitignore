@@ -13,3 +13,4 @@ flaskr/.apikey
 flaskr/.idea
 flaskr.egg*
 flaskr/tag_recognition/__pycache__/*
+flaskr/nohup.out

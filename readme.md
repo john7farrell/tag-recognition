@@ -1,18 +1,52 @@
-## Tag Recognition DEMO
+# Tag Recognition DEMO
+
+- Tag image OCR by Google Cloud Platform's Vision API 
+- Result processing
+
+## Preparation
+```bash
+cd tag-recognition
+```
 
 ### First install miniconda by:
-```bash BASHME_miniconda*```
+```bash
+bash BASHME_miniconda*
+```
 
 ### Then create virtual env by:
-```conda create -n flask-py35 python=3.5```
+```bash
+conda create -n flask-py35 python=3.5
+source activate flask-py35
+```
 
 ### Then install necessary libraries by:
-```pip install -r requirements.txt```
+```bash
+pip install -r requirements.txt
+```
 
 ### Add GCP Vision APIKEY
-```#vi /flaskr/.apikey```
+```bash
+vi ./flaskr/.apikey
+```
 
-### Note(Problems)
+### Add environment var
+```bash
+cd flaskr
+export FLASK_APP=flaskr.py
+export FLASK_DEBUG=true
+pip install --editable ..
+```
+
+## Run
+```bash
+flask initdb
+flask run #(default host: 127.0.0.1)
+# or other host like
+flask run --host=0.0.0.0
+```
+
+## Note
+### Problems(Possible)
 - socket gaierror: \[Errno -2\] Name or service not known
 
 ### Reference(Possible):
@@ -20,3 +54,4 @@
 - https://stackoverflow.com/questions/23777121/why-am-i-getting-socket-gaierror-errno-2-from-python-httplib
 
 - (*add Google DNS*) https://stackoverflow.com/questions/28668180/cant-install-pip-packages-inside-a-docker-container-with-ubuntu
+
