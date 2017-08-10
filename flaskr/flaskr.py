@@ -13,6 +13,7 @@ from wtforms import SubmitField, SelectField
 from flaskr.tag_recognition.preprocess import getResizedImage
 from flaskr.tag_recognition.json_analyze import json_result
 from flaskr.tag_recognition.gcv_api import gcv_result
+from collections import OrderedDict
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -85,21 +86,20 @@ with open('.apikey', 'r') as f:
 photos = UploadSet('photos', IMAGES)
 configure_uploads(app, photos)
 patch_request_class(app)  # set maximum file size, default is 16MB
-id_rule_dict = {
-    'BEAMS': [2, 2, 4, 3, 2, 2],
-    'OWD': [12],
-    'SHIPS': [3,2,4,4],
-    'TML': [2,2,2,7],
-    'UA': [4,3,4,4],
-    'Sanyo': [5, 3, 2],
-    'alcali': [11],
-    'CONVERSE TOKYO': [11],
-    'Liess': [11],
-    'martinique': [11],
-    'MENS MELROSE': [10],
-    'Soffitto': [10],
-    'Unknown13': [13]
-}
+id_rule_dict = OrderedDict()
+id_rule_dict['Unknown13'] = [13]
+id_rule_dict['BEAMS'] = [2, 2, 4, 3, 2, 2]
+id_rule_dict['OWD'] = [12]
+id_rule_dict['SHIPS'] = [3, 2, 4, 4]
+id_rule_dict['TML'] = [2, 2, 2, 7]
+id_rule_dict['UA'] = [4, 3, 4, 4]
+id_rule_dict['Sanyo'] = [5, 3, 2]
+id_rule_dict['alcali'] = [11]
+id_rule_dict['CONVERSE TOKYO'] = [11]
+id_rule_dict['Liess'] = [11]
+id_rule_dict['martinique'] = [11]
+id_rule_dict['MENS MELROSE'] = [10]
+id_rule_dict['Soffitto'] = [10]
 
 
 def get_id_rule_choice(k):
@@ -147,10 +147,9 @@ def upload_file():
         filename, fileext = os.path.splitext(form.photo.data.filename)
         filename = ''.join([filename, fileext.lower()])
         db = get_db()
-        fetch_query = "select * from entries where title='" +\
+        fetch_query = "select * from entries where title='" + \
                       filename.split('.')[0] + "';"
         cur = db.execute(fetch_query)
-        entries = cur.fetchall()
         if filename not in file_list:
             filename = photos.save(form.photo.data)
         columns = ['title', 'ProductId', 'Origin',
@@ -165,9 +164,10 @@ def upload_file():
         if fname_json not in os.listdir(file_dir):
             gcv_result(file_dir + '/' + fname_resized + fext,
                        api_key=app.config['API_KEY'])
-        res = json_result(fname_json, [3, 3, 3, 3])
-        query_excuted = 'replace into entries (' +\
-                        ','.join(columns) +\
+        id_rule = id_rule_dict[list(id_rule_dict.keys())[int(form.select.data)]]
+        res = json_result(fname_json, id_rule)
+        query_excuted = 'replace into entries (' + \
+                        ','.join(columns) + \
                         ') values (?, ?, ?, ?, ?, ?, ?, ?)'
         db.execute(query_excuted,
                    [fname] + [res['ID'][1],
