@@ -149,7 +149,6 @@ def upload_file():
         db = get_db()
         fetch_query = "select * from entries where title='" + \
                       filename.split('.')[0] + "';"
-        cur = db.execute(fetch_query)
         if filename not in file_list:
             filename = photos.save(form.photo.data)
         columns = ['title', 'ProductId', 'Origin',
@@ -166,6 +165,7 @@ def upload_file():
                        api_key=app.config['API_KEY'])
         id_rule = id_rule_dict[list(id_rule_dict.keys())[int(form.select.data)]]
         res = json_result(fname_json, id_rule)
+        print(res)
         query_excuted = 'replace into entries (' + \
                         ','.join(columns) + \
                         ') values (?, ?, ?, ?, ?, ?, ?, ?)'

@@ -4,6 +4,7 @@
 
 import re
 import os
+import sys
 import json
 import numpy as np
 import pandas as pd
@@ -132,9 +133,16 @@ def getPartMaterial(fullText):
 def json_result(jsonname, id_msk=[13], jsondir='upload'):
     assert '.json' in jsonname, 'Please select a json file!'
     assert 'maxHeight' in jsonname, 'Please use resized image!'
-    fullText = getFullText(load_json(jsondir+'/'+jsonname))
+    try:
+        fullText = getFullText(load_json(jsondir+'/'+jsonname))
+    except KeyError as k_err:
+        print("Key error: {0}".format(k_err))
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+    finally:
+        print('Set fullText to null')
+        fullText = 'null'
     res = dict()
-    #res['filename'] = jsonname.split('.')[0]
     res['FullText'] = fullText
     res['ID'] = getId(fullText, id_msk)
     res['Origin'] = getOrigin(fullText)
