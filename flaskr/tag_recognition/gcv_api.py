@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Please supply an api key, then one or more image filenames
-$ python cloudvisreq.py api_key image1.jpg image2.png
-
-python gist_cloudvisreq_resDir.py 'xxx' '../tag images'
-
-# api key(mat.xi):
-# AIzaSyAwrUETKbU8c8zUnMpbaBoEkZSUAdFkYDY
-
 json is saved in the same location as the iamges
 reference:
 => https://gist.github.com/dannguyen/a0b69c84ebc00c54c94d
@@ -82,12 +74,11 @@ def response_proc(response, fnames):
 
 
 def gcv_result(*image_filenames, api_key):
-    # api_key = 'AIzaSyD8mTayupQL6xFu5eEa7Wu5KCKqv0bLSSg'
+    # api_key = 'AIzaSyAwrUETKbU8c8zUnMpbaBoEkZSUAdFkYDY'
     if not api_key or not image_filenames:
         print("""
-            Please supply an api key, then one or more image filenames
-
-            $ python cloudvisreq.py api_key image1.jpg image2.png""")
+            Please supply one or more image filenames, then api key
+            """)
     else:
         max_per_request = 16
         if len(image_filenames) <= max_per_request:
@@ -101,4 +92,4 @@ def gcv_result(*image_filenames, api_key):
             for fnames_batch in fnames_queue:
                 response = request_ocr(api_key, fnames_batch)
                 response_proc(response, fnames_batch)
-                time.sleep(0.1)
+                time.sleep(0.01)
