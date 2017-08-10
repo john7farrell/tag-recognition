@@ -137,9 +137,10 @@ def json_result(jsonname, id_msk=[13], jsondir='upload'):
         fullText = getFullText(load_json(jsondir+'/'+jsonname))
     except KeyError as k_err:
         print("Key error: {0}".format(k_err))
+        print('Set fullText to null')
+        fullText = 'null'
     except:
         print("Unexpected error:", sys.exc_info()[0])
-    finally:
         print('Set fullText to null')
         fullText = 'null'
     res = dict()
