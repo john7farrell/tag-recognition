@@ -16,8 +16,12 @@ origin_df = pd.read_excel('./tag_recognition/origin_df.xlsx')
 origin_set = set([s[:-1] for s in list(origin_df['origin'])])
 origin_set.remove('輸入衣料')
 material_df = pd.read_excel('./tag_recognition/material_new_df.xlsx')
-part_set = set(material_df.part);
+part_set = set(material_df.part)
 part_set.remove('.')
+part_set.remove('91')
+part_set.remove('C/♯7931')
+part_set.remove('GRAY')
+part_set.remove('WHITE')
 material_set = set(material_df.material)
 
 
@@ -49,7 +53,7 @@ def getId(fullText, id_msk):
             li = li.split('STYLE')[1].strip()
 #        print(li)
 #        print(brand_dir)
-        li = ''.join(li.split(' '))
+        li = '-'.join(li.split(' '))
         digit_nb = sum(list(map(str.isdigit, list(li))))
         if digit_nb < 3:
             li = ''
@@ -57,14 +61,26 @@ def getId(fullText, id_msk):
             li = ''
         li = ''.join(re.findall('[a-zA-Z0-9 -]', li))
         li_split = li.split('-')
+        #print(0,li_split)
+        if ' ' in li_split[-1]:
+            li_split_last = li_split[-1].split(' ')[0]
+            li_split[-1] = li_split_last
+            #print(1,li_split)
+        if len(li_split[-1]) > id_msk[-1]:
+            li_split_last = li_split[-1][:id_msk[-1]]
+            li_split[-1] = li_split_last
+            #print(2,li_split)
         if len(li_split) < sum(id_msk):
             li_split = li_split + ['0'] * (sum(id_msk) - len(li_split))
         else:
             li_split = li_split[:len(id_msk)]
+        li_split = li_split[:len(id_msk)]
+        #print(3,li_split)
         li_len = list(map(len, li_split))
         mse = lambda liLen: np.mean([abs(liLen[i] - id_msk[i])
                                          for i in range(min(len(liLen), len(id_msk)))])
-        return mse(li_len), li
+        #print(mse(li_len), li_split)
+        return mse(li_len), '-'.join(li_split)
     res_li = [check_line(s) for s in fullText_split_n]
     mse_li = [res[0] for res in res_li]
 #    print(res_li)
@@ -75,7 +91,6 @@ def getId(fullText, id_msk):
 
 def getOrigin(fullText):
     fullText_split_n = fullText.split('\n')
-
     def check_line(line):
         #        line_raw = str(line)
         line = line.upper()
@@ -84,18 +99,9 @@ def getOrigin(fullText):
             return 'MADE IN ' + line.split('MADEIN')[1]
         elif 'ADEIN' in line:
             return 'MADE IN ' + line.split('ADEIN')[1]
-        # elif len(line) > 1 and '製' in line[1:] and len(line) < len('MADEINAMERICA'):
-        #            return line_raw
-        #        elif '産地' in line:
-        #            return line_raw
-        #        elif '原産国' in line:
-        #            return line_raw
         else:
             return ''
-
     res_li = [check_line(s) for s in fullText_split_n]
-    # res_li = list(set(filter(lambda x: x != '', res_li)))
-
     fullText = fullText.replace('\n', ' ')
     fullText = fullText.replace('　', ' ')
     fullText_split = fullText.split(' ')
@@ -103,7 +109,19 @@ def getOrigin(fullText):
         term = term.strip('0123456789%')
         if term in origin_set or term.split('製')[0] in origin_set:
             res_li.append(term)
+    origin_cnt = 0
+    for origin in origin_set:
+        if origin in fullText:
+            origin_cnt += 1
+            res_li.append(origin + '製')
     res_li = list(set(filter(lambda x: x != '', res_li)))
+    res_li2 = []
+    for res in res_li:
+        if '製' not in res:
+            res_li2.append(res + '製')
+        else:
+            res_li2.append(res)
+    res_li = list(set(res_li2))
     return res_li
 
 
@@ -123,6 +141,10 @@ def getPartMaterial(fullText):
 
     digit_percent = lambda s: re.compile('\d+%').findall(s)
     digit_percent_res = digit_percent(fullText)
+    if '00%' in digit_percent_res:
+        digit_percent_res.remove('00%')
+        if '100%' not in digit_percent_res:
+            digit_percent_res.append('100%')
 
     return {'part': list(set(part_res)),
             'material': list(set(material_res)),
@@ -132,7 +154,7 @@ def getPartMaterial(fullText):
 
 def json_result(jsonname, id_msk=[13], jsondir='upload'):
     assert '.json' in jsonname, 'Please select a json file!'
-    assert 'maxHeight' in jsonname, 'Please use resized image!'
+    assert 'proc' or 'maxHeight' in jsonname, 'Please use resized image!'
     try:
         fullText = getFullText(load_json(jsondir+'/'+jsonname))
     except KeyError as k_err:

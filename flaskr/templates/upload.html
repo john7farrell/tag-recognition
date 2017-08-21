@@ -15,9 +15,13 @@
 		</form>
 		{% if file_url %}
 			<br>
+			<h1>Original VS. Enhanced</h1>
             <div class="img">
-			<img src="{{ file_url }}">
-            </div>
+				<img src="{{ file_url }}">
+			</div>
+			<div class="img">
+				<img src="{{ file_proc_url }}">
+			</div>
 		{% endif %}
 	{% endif %}
 	<ul class=entries>
