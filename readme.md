@@ -1,5 +1,6 @@
 # Tag Recognition DEMO
 
+- Preprocess tag image
 - Tag image OCR by Google Cloud Platform's Vision API 
 - Result processing
 
@@ -43,6 +44,13 @@ flask initdb
 flask run #(default host: 127.0.0.1)
 # or other host like
 flask run --host=0.0.0.0
+```
+
+## Run test tag recognition(without running flask)
+```bash
+# place test images into ./flaskr/upload
+cd ./flaskr
+python test_tag_recognition
 ```
 
 ## Note
