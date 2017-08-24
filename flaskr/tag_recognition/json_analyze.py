@@ -141,21 +141,28 @@ def getOrigin(fullText):
     fullText_split = fullText.split(' ')
     # loop in terms of fulltext, check if in origin set
     last_term = ''
+    def cands_rank(cands):
+        get_rank = lambda s: int(origin_df[origin_df['origin'] == s+'製']['rank'])
+        max_score = cands[0][1]
+        thrs = 0.9 * max_score
+        cands_slct = list(filter(lambda c: c[1]>thrs, cands))
+        cands_slct_scr = [(c[0], c[1] * (max(100, len(origin_set)) - get_rank(c[0]))) \
+                          for c in cands_slct]
+        print(cands_slct_scr)
+        return sorted(cands_slct_scr, key=lambda x:x[1])
     for term in fullText_split:
         term = term.strip('0123456789%')
         if term in origin_set or term.split('製')[0] in origin_set:
             res_li.append(term)
         else:
             if '製' == term:
-                cand = ng_origin.search(last_term)
-                if cand != [] and cand[0][1] > 0.003:
-                    res_li.append(cand[0][0])
-                # print(cand)
+                cands = ng_origin.search(last_term)
+                ranked_cands = cands_rank(cands)
+                res_li.append(ranked_cands[-1][0])
             elif '製' in term:
-                cand = ng_origin.search(term)
-                if cand != [] and cand[0][1] > 0.003:
-                    res_li.append(cand[0][0])
-                # print(term)
+                cands = ng_origin.search(term)
+                ranked_cands = cands_rank(cands)
+                res_li.append(ranked_cands[-1][0])
     origin_cnt = 0
     # loop in terms of origin set, check if in fulltext
     for origin in origin_set:
