@@ -139,7 +139,6 @@ def getPartMaterial(fullText):
     fullText = fullText.replace('\n', ' ')
     fullText_split = fullText.split(' ')
     fullText_split = list(filter(lambda s: s != '', fullText_split))
-    fullText_row = ''.join(fullText_split)
     part_res = []
     material_res = []
     percent_res = []
