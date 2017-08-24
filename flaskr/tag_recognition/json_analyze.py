@@ -6,11 +6,11 @@ import re
 import os
 import sys
 import json
+import ngram
 import numpy as np
 import pandas as pd
 #from collections import OrderedDict
 
-#print(os.getcwd())
 brand_msk_pairs = [('default',[13])]
 origin_df = pd.read_excel('./tag_recognition/origin_df.xlsx')
 origin_set = set([s[:-1] for s in list(origin_df['origin'])])
@@ -23,8 +23,37 @@ part_set.remove('C/♯7931')
 part_set.remove('GRAY')
 part_set.remove('WHITE')
 part_set.remove('本体')
+part_set.add('表生地·裏生地')
 material_set = set(material_df.material)
-material_set.remove('本体')
+mat_to_remove =  ['本体',
+                  '表',
+                  '左',
+                  'リブ部分',
+                  'ワッペン部分',
+                  '刺しゅう糸',
+                  '刺しゅう部分',
+                  '前部',
+                  '刺繍糸',
+                  '掌部',
+                  '皮革部分',
+                  '表側',
+                  '表側・裏側',
+                  '表生地',
+                  '表生地NYLON55％COTTON45％裏生地POLYESTER',
+                  '表生地・裏生地',
+                  '裏生地',
+                  '袖下',
+                  '袖口リブ',
+                  '裏側',
+                  '裏地',
+                  '襟裾リブ',
+                  'ﾚｰﾖﾝ51.綿49.']
+
+
+ng_part = ngram.NGram(part_set)
+ng_origin = ngram.NGram(origin_set)
+ng_material = ngram.NGram(material_set)
+
 
 def load_json(filename):
     with open(filename) as data_file:
@@ -111,10 +140,22 @@ def getOrigin(fullText):
     fullText = fullText.replace('　', ' ')
     fullText_split = fullText.split(' ')
     # loop in terms of fulltext, check if in origin set
+    last_term = ''
     for term in fullText_split:
         term = term.strip('0123456789%')
         if term in origin_set or term.split('製')[0] in origin_set:
             res_li.append(term)
+        else:
+            if '製' == term:
+                cand = ng_origin.search(last_term)
+                if cand != [] and cand[0][1] > 0.003:
+                    res_li.append(cand[0][0])
+                # print(cand)
+            elif '製' in term:
+                cand = ng_origin.search(term)
+                if cand != [] and cand[0][1] > 0.003:
+                    res_li.append(cand[0][0])
+                # print(term)
     origin_cnt = 0
     # loop in terms of origin set, check if in fulltext
     for origin in origin_set:
@@ -134,11 +175,22 @@ def getOrigin(fullText):
 
 
 def getPartMaterial(fullText):
+    if 'quality' in fullText:
+        fullText = fullText.split('quality')[-1]
+    for k, scr in ng_part.search(fullText):
+        if k in fullText:
+            fullText = fullText.replace(k, ' '+k+' ')
+            break
+    for k, scr in ng_material.search(fullText):
+        if k in fullText:
+            fullText = fullText.replace(k, ' '+k+' ')
+            break
     fullText = fullText.replace('％', '%')
     fullText = fullText.replace('　', ' ')
     fullText = fullText.replace('\n', ' ')
     fullText_split = fullText.split(' ')
     fullText_split = list(filter(lambda s: s != '', fullText_split))
+    fullText_row = ''.join(fullText_split)
     part_res = []
     material_res = []
     percent_res = []
