@@ -50,7 +50,7 @@ flask run --host=0.0.0.0
 ```bash
 # place test images into ./flaskr/upload
 cd ./flaskr
-python test_tag_recognition
+python test_tag_recognition.py
 ```
 
 ## Note

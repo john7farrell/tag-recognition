@@ -13,7 +13,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import SubmitField, SelectField, validators
 from flaskr.tag_recognition.preprocess \
-    import getResizedImage, getEnhancedImage, getDeskewedImage, getRotatedImage
+    import getResizedImage, getEnhancedImage, getDeskewedImage
 from flaskr.tag_recognition.json_analyze import json_result
 from flaskr.tag_recognition.gcv_api import gcv_result
 from werkzeug.utils import secure_filename

@@ -39,10 +39,12 @@ def getId(fullText, id_msk):
     fullText_split_n = fullText.split('\n')
     def check_line(li):
         start_idx = 0
+        # skip the first several strings if they are lower-case (rare in ID)
         while start_idx < len(li) and li[start_idx].islower():
             start_idx += 1
         li = li[start_idx:]
         li = li.upper()
+        # filter specific keywords
         if 'NO.' in li:
             li = li.split('NO.')[1].strip()
         elif 'NO' in li:
@@ -51,15 +53,16 @@ def getId(fullText, id_msk):
             li = li.split('NUMBER')[1].strip()
         elif 'STYLE' in li:
             li = li.split('STYLE')[1].strip()
-#        print(li)
-#        print(brand_dir)
+        # re-connect by '-'
         li = '-'.join(li.split(' '))
         digit_nb = sum(list(map(str.isdigit, list(li))))
+        # if less than 3 numbers, set to ''
         if digit_nb < 3:
             li = ''
         if '$' in li:
             li = ''
         li = ''.join(re.findall('[a-zA-Z0-9 -]', li))
+        # split by '-'
         li_split = li.split('-')
         #print(0,li_split)
         if ' ' in li_split[-1]:
@@ -70,6 +73,7 @@ def getId(fullText, id_msk):
             li_split_last = li_split[-1][:id_msk[-1]]
             li_split[-1] = li_split_last
             #print(2,li_split)
+        # padding 0 if shorter than id_msk
         if len(li_split) < sum(id_msk):
             li_split = li_split + ['0'] * (sum(id_msk) - len(li_split))
         else:
@@ -77,6 +81,7 @@ def getId(fullText, id_msk):
         li_split = li_split[:len(id_msk)]
         #print(3,li_split)
         li_len = list(map(len, li_split))
+        # calculate length difference (mse) of different parts
         mse = lambda liLen: np.mean([abs(liLen[i] - id_msk[i])
                                          for i in range(min(len(liLen), len(id_msk)))])
         #print(mse(li_len), li_split)
@@ -92,7 +97,6 @@ def getId(fullText, id_msk):
 def getOrigin(fullText):
     fullText_split_n = fullText.split('\n')
     def check_line(line):
-        #        line_raw = str(line)
         line = line.upper()
         line = ''.join(line.split(' '))
         if 'MADEIN' in line:
@@ -105,17 +109,20 @@ def getOrigin(fullText):
     fullText = fullText.replace('\n', ' ')
     fullText = fullText.replace('　', ' ')
     fullText_split = fullText.split(' ')
+    # loop in terms of fulltext, check if in origin set
     for term in fullText_split:
         term = term.strip('0123456789%')
         if term in origin_set or term.split('製')[0] in origin_set:
             res_li.append(term)
     origin_cnt = 0
+    # loop in terms of origin set, check if in fulltext
     for origin in origin_set:
         if origin in fullText:
             origin_cnt += 1
             res_li.append(origin + '製')
     res_li = list(set(filter(lambda x: x != '', res_li)))
     res_li2 = []
+    # merge / delete replica
     for res in res_li:
         if '製' not in res:
             res_li2.append(res + '製')
