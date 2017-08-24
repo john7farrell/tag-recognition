@@ -24,7 +24,7 @@ part_set.remove('GRAY')
 part_set.remove('WHITE')
 part_set.remove('本体')
 material_set = set(material_df.material)
-
+material_set.remove('本体')
 
 def load_json(filename):
     with open(filename) as data_file:

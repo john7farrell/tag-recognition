@@ -187,7 +187,7 @@ def upload_file():
         image_proc = getEnhancedImage(file_dir + '/' + file_name + file_ext)
         image_proc = getDeskewedImage('', image_proc)
         image_proc = getResizedImage('', image_proc,
-                                     maxHeight=600)
+                                     maxHeight=900)
         cv2.imwrite(file_dir + '/' + file_name + '_proc' + file_ext,
                     image_proc)
         del image_proc
