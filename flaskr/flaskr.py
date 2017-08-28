@@ -113,10 +113,14 @@ def get_id_rule_choice(k):
 
 
 class UploadForm(FlaskForm):
+    # image upload
     photo = FileField(validators=[
         FileAllowed(photos, 'Only pictures are allowed'),
         FileRequired('Please select file！')])
+    # submit
     submit = SubmitField('Upload')
+    # select (select ID rule)
+    # choices=[(coerce, choice)]
     select = SelectField(
         'ID Rule:',
         choices=[
@@ -137,7 +141,7 @@ class UploadForm(FlaskForm):
         default=5,
         validators=[validators.optional()],
         coerce=int
-    )
+    )  # set default option to UA, set coerce to int(default str)
 
 
 def replace_into_db(res, file_name, fullname):
@@ -184,17 +188,22 @@ def upload_file():
             fullname = photos.save(form.photo.data)
         # get preprocessed image
         file_name, file_ext = os.path.splitext(fullname)
+        ## preprocessing
+        # 1. adjust brightness
         image_proc = getEnhancedImage(file_dir + '/' + file_name + file_ext)
+        # 2. adjust image angle
         image_proc = getDeskewedImage('', image_proc)
+        # 3. resize image
         image_proc = getResizedImage('', image_proc,
                                      maxHeight=900)
+        ## save the processed image
         cv2.imwrite(file_dir + '/' + file_name + '_proc' + file_ext,
                     image_proc)
         del image_proc
         # get file_name, file_extension, json_file_name
         fname_proc = file_name + '_proc'
         fname_json = fname_proc + file_ext + '.json'
-        # if json file is not existed, get json by google vision api
+        # if no json file for the image uploaded, call google vision api
         if fname_json not in os.listdir(file_dir):
             gcv_result(file_dir + '/' + fname_proc + file_ext,
                        api_key=app.config['API_KEY'])

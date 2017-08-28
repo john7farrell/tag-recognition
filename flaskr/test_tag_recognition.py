@@ -39,7 +39,7 @@ id_rule_dict = {
 #%% get objective images
 file_dir = app_config['UPLOADED_PHOTOS_DEST']
 file_list = os.listdir(file_dir)
-# set filter rules here to filter specific files
+### add filter rules here to filter specific files !!!
 file_list = list(filter(lambda s: '.json' not in s and \
                         'maxHeight' not in s and \
                         '.git' not in s, file_list))
@@ -56,21 +56,25 @@ res = {'Origin': [],
 cnt = 0
 for fullname in file_list:
     file_name, file_ext = os.path.splitext(fullname)
-    # preprocessing
+    ## preprocessing
+    # 1. adjust brightness
     image_proc = getEnhancedImage(file_dir + '/' + file_name + file_ext)
+    # 2. adjust image angle
     image_proc = getDeskewedImage('', image_proc)
+    # 3. resize image
     image_proc = getResizedImage('', image_proc,
-                                 maxHeight=600)
+                                 maxHeight=900)
+    ## save the processed image
     cv2.imwrite(file_dir + '/' + file_name + '_proc' + file_ext,
                 image_proc)
     del image_proc
     fname_proc = file_name + '_proc'
     fname_json = fname_proc + file_ext + '.json'
-    # if no json file, call google vision api
+    # if no json file for the image uploaded, call google vision api
     if fname_json not in os.listdir(file_dir):
         gcv_result(file_dir + '/' + fname_proc + file_ext,
                    api_key=app_config['API_KEY'])
-    # analyze json
+    # analyze json to get info of image
     res = json_result(fname_json, id_rule_dict['UA'], file_dir)
     res['ID'] = res['ID'][1] if res['ID'] != '' else ''
     res['Filename'] = fname_proc
@@ -82,5 +86,6 @@ for fullname in file_list:
 #        break
 #%%
 res_df = pd.DataFrame(res_li)
-#res_df.to_excel('json_anal_result.xlsx') # save result to excel
+# save result to excel
+#res_df.to_excel('json_anal_result.xlsx')
 del res, res_li
