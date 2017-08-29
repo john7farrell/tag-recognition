@@ -48,7 +48,8 @@ mat_to_remove =  ['本体',
                   '裏地',
                   '襟裾リブ',
                   'ﾚｰﾖﾝ51.綿49.']
-
+for rem in mat_to_remove:
+    material_set.remove(rem)
 
 ng_part = ngram.NGram(part_set)
 ng_origin = ngram.NGram(origin_set)
@@ -155,14 +156,11 @@ def getOrigin(fullText):
         if term in origin_set or term.split('製')[0] in origin_set:
             res_li.append(term)
         else:
-            if '製' == term:
+            if '製' == term or '製' in term:
                 cands = ng_origin.search(last_term)
-                ranked_cands = cands_rank(cands)
-                res_li.append(ranked_cands[-1][0])
-            elif '製' in term:
-                cands = ng_origin.search(term)
-                ranked_cands = cands_rank(cands)
-                res_li.append(ranked_cands[-1][0])
+                if len(cands) > 0:
+                    ranked_cands = cands_rank(cands)
+                    res_li.append(ranked_cands[-1][0])
     origin_cnt = 0
     # loop in terms of origin set, check if in fulltext
     for origin in origin_set:
