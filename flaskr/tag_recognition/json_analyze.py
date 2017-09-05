@@ -156,11 +156,20 @@ def getOrigin(fullText):
         if term in origin_set or term.split('製')[0] in origin_set:
             res_li.append(term)
         else:
-            if '製' == term or '製' in term:
+            # generate potential candidates of terms
+            cands = []
+            # use ngram to search with error
+            # e.g.: ..., 日木(last_term), 製(term), ...
+            if '製' == term:
                 cands = ng_origin.search(last_term)
-                if len(cands) > 0:
-                    ranked_cands = cands_rank(cands)
-                    res_li.append(ranked_cands[-1][0])
+            # e.g.: ..., ベーナム製(term), ...
+            elif '製' in term:
+                cands = ng_origin.search(term)
+            if len(cands) > 0:
+                # (cand, score)
+                ranked_cands = cands_rank(cands)
+                res_li.append(ranked_cands[-1][0])
+        last_term = term
     origin_cnt = 0
     # loop in terms of origin set, check if in fulltext
     for origin in origin_set:
@@ -180,8 +189,13 @@ def getOrigin(fullText):
 
 
 def getPartMaterial(fullText):
+    # generally, part or material information is after 'quality',
+    # in ua-images
     if 'quality' in fullText:
         fullText = fullText.split('quality')[-1]
+    # search by ngram
+    # and fill spaces in keywords:
+    # e.g.: "裏生地コットン" -> " 裏生地  コットン "
     for k, scr in ng_part.search(fullText):
         if k in fullText:
             fullText = fullText.replace(k, ' '+k+' ')
@@ -198,6 +212,7 @@ def getPartMaterial(fullText):
     part_res = []
     material_res = []
     percent_res = []
+    # match all percentages
     digit_percent = lambda s: re.compile('\d+%').findall(s)
     digit_percent_res = digit_percent(fullText)
     for term_raw in fullText_split:
@@ -206,13 +221,18 @@ def getPartMaterial(fullText):
             part_res.append(term)
         if term in material_set and term not in part_set:
             material_res.append(term)
+            # make material+percentage pair
             if digit_percent_res != []:
                 pct = digit_percent_res.pop(0)
                 if pct == '00%':
                     pct = '100%'
                 percent_res.append(term+pct)
+            # mismatch length of percent list and material list
+            # len(mat) > len(percent)
             else:
                 percent_res.append(term+'?%')
+    # mismatch length of percent list and material list
+    # len(mat) < len(percent)
     if digit_percent_res != []:
         for pct in digit_percent_res:
             percent_res.append('?'+pct)
