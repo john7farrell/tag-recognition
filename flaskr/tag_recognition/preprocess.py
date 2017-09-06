@@ -134,12 +134,15 @@ def getDeskewedImage(img_name, img_obj=None,
     s0_res['s0_diff_max'] = s0_res.s0_diff.apply(np.max)
     # get position of s0_diff_max
     ang_idx = np.argmax(s0_res['s0_diff_max'])
+    # ang is the final angle to be applied rotation on the original image
     ang = angle_li[ang_idx]
     # print('rotate {}'.format(ang))
 
     # if ang is 0 or 45 ~ ang_max, ang -> -ang
+    # to prevent rotate normal vertical image to be horizontal
     if abs(ang_max)*(1-9e-5) > abs(ang) > 45:
         ang = -ang
         print('(fix)rotate {}'.format(ang))
+    # apply rotation
     img_deskewed = getRotatedImage(img, ang)
     return img_deskewed

@@ -49,6 +49,7 @@ file_list = os.listdir(file_dir)
 ### add filter rules here to filter specific files !!!
 file_list = list(filter(lambda s: '.json' not in s and \
                         'maxHeight' not in s and \
+                        '_proc' not in s and \
                         '.git' not in s, file_list))
 res_li = []
 res = {'Origin': [],
@@ -58,6 +59,10 @@ res = {'Origin': [],
        'Material': [],
        'Part': [],
        'Filename': ''}
+# result format:
+# res -> dict
+# res_li -> list: [res, res, res, ...]
+# res_df = pd.DataFrame(res_li)
 
 
 #%% iteratively process

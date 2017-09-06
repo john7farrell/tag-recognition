@@ -12,6 +12,8 @@ import pandas as pd
 #from collections import OrderedDict
 
 brand_msk_pairs = [('default',[13])]
+
+# read data and remove some error terms
 origin_df = pd.read_excel('./tag_recognition/origin_df.xlsx')
 origin_set = set([s[:-1] for s in list(origin_df['origin'])])
 origin_set.remove('輸入衣料')
@@ -25,6 +27,7 @@ part_set.remove('WHITE')
 part_set.remove('本体')
 part_set.add('表生地·裏生地')
 material_set = set(material_df.material)
+# terms appearing in part_set as well as material_set
 mat_to_remove =  ['本体',
                   '表',
                   '左',
@@ -68,6 +71,7 @@ def getFullText(data_json):
 
 def getId(fullText, id_msk):
     fullText_split_n = fullText.split('\n')
+    # check one line and calculate mismatch score
     def check_line(li):
         start_idx = 0
         # skip the first several strings if they are lower-case (rare in ID)
@@ -87,7 +91,7 @@ def getId(fullText, id_msk):
         # re-connect by '-'
         li = '-'.join(li.split(' '))
         digit_nb = sum(list(map(str.isdigit, list(li))))
-        # if less than 3 numbers, set to ''
+        # if less than 3 numbers, impossible to be ID, set to ''
         if digit_nb < 3:
             li = ''
         if '$' in li:
@@ -112,6 +116,7 @@ def getId(fullText, id_msk):
         li_split = li_split[:len(id_msk)]
         #print(3,li_split)
         li_len = list(map(len, li_split))
+        # mismatch score:
         # calculate length difference (mse) of different parts
         mse = lambda liLen: np.mean([abs(liLen[i] - id_msk[i])
                                          for i in range(min(len(liLen), len(id_msk)))])
@@ -127,6 +132,7 @@ def getId(fullText, id_msk):
 
 def getOrigin(fullText):
     fullText_split_n = fullText.split('\n')
+    # check and transform one line
     def check_line(line):
         line = line.upper()
         line = ''.join(line.split(' '))
@@ -138,11 +144,13 @@ def getOrigin(fullText):
             return ''
     res_li = [check_line(s) for s in fullText_split_n]
     fullText = fullText.replace('\n', ' ')
+    # replace full-corner space
     fullText = fullText.replace('　', ' ')
     fullText_split = fullText.split(' ')
     # loop in terms of fulltext, check if in origin set
     last_term = ''
     def cands_rank(cands):
+        # 'rank' is descendingly ordered in origin_df
         get_rank = lambda s: int(origin_df[origin_df['origin'] == s+'製']['rank'])
         max_score = cands[0][1]
         thrs = 0.9 * max_score
@@ -204,6 +212,7 @@ def getPartMaterial(fullText):
         if k in fullText:
             fullText = fullText.replace(k, ' '+k+' ')
             break
+    # replace full-corner characters
     fullText = fullText.replace('％', '%')
     fullText = fullText.replace('　', ' ')
     fullText = fullText.replace('\n', ' ')

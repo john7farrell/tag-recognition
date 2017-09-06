@@ -24,8 +24,8 @@ app.config.from_object(__name__)
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'flaskr.db'),
     SECRET_KEY='development key',
-    USERNAME='admin',
-    PASSWORD='admin'
+    USERNAME='admin', # login username
+    PASSWORD='admin'  # login password
 ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
